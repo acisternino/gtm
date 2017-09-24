@@ -13,13 +13,29 @@ type tree struct {
 	root *frame
 }
 
-func newTree(initialSize int32) (t *tree) {
-	f := &frame{
-		length:  initialSize,
-		address: 0,
+const (
+	Right = iota
+	Left
+	TouchRight
+	TouchLeft
+	Overlaps
+)
+
+func (f *frame) position(other *frame) int {
+
+	end := f.address + f.length
+	otherEnd := other.address + other.length
+
+	switch {
+	case other.address > end:
+		return Right
+	case otherEnd < f.address:
+		return Left
+	case other.address == end:
+		return TouchRight
+	case otherEnd == f.address:
+		return TouchLeft
+	default:
+		return Overlaps
 	}
-	t = &tree{
-		root: f,
-	}
-	return
 }

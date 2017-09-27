@@ -2,6 +2,10 @@
 
 package memory
 
+import (
+	"math"
+)
+
 type frame struct {
 	length  int32
 	address int32
@@ -14,12 +18,59 @@ type tree struct {
 }
 
 const (
-	Right = iota
-	Left
-	TouchRight
-	TouchLeft
-	Overlaps
+	right = iota
+	left
+	touchRight
+	touchLeft
+	overlaps
 )
+
+var (
+	lowestLeft  = &frame{math.MinInt32, math.MinInt32, nil, nil}
+	lowestRight = &frame{math.MinInt32, math.MaxInt32, nil, nil}
+)
+
+func newTree() *frame {
+	return &frame{
+		length:  math.MaxInt32,
+		address: math.MinInt32,
+		left:    lowestLeft,
+		right:   lowestRight,
+	}
+}
+
+// insert inserts a frame into the tree below the current one
+func (f *frame) insert(newFrame *frame) {
+
+	loop := true
+	node := f
+
+	for loop {
+		if newFrame.length <= node.length {
+			// new node is smaller than current, go down according to address
+
+			if newFrame.address <= node.address {
+				// descend left
+				node = node.left
+			} else {
+				// descend right
+				node = node.right
+			}
+
+		} else {
+			// new node is larger than current, insert here
+
+			f.right = newFrame
+			newFrame.right = node
+			newFrame.left = lowestLeft
+			loop = false
+
+			newFrame.left = node
+			newFrame.right = lowestRight
+			// how do I change the parent?  parent.left = newFrame
+		}
+	}
+}
 
 func (f *frame) position(other *frame) int {
 
@@ -28,14 +79,14 @@ func (f *frame) position(other *frame) int {
 
 	switch {
 	case other.address > end:
-		return Right
+		return right
 	case otherEnd < f.address:
-		return Left
+		return left
 	case other.address == end:
-		return TouchRight
+		return touchRight
 	case otherEnd == f.address:
-		return TouchLeft
+		return touchLeft
 	default:
-		return Overlaps
+		return overlaps
 	}
 }

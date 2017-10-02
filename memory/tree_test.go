@@ -2,7 +2,20 @@
 
 package memory
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
+
+func (f *frame) checkNode(expectedLeft, expectedRight *frame, name string) error {
+	if f.right != expectedRight {
+		return fmt.Errorf("%s right leaf doesn't match. Was: %v", name, f.right)
+	}
+	if f.left != expectedLeft {
+		return fmt.Errorf("%s left leaf doesn't match. Was: %v", name, f.left)
+	}
+	return nil
+}
 
 func TestInsertFirst(t *testing.T) {
 	tree := newTree()
@@ -32,17 +45,12 @@ func TestInsertLeft(t *testing.T) {
 	if tree.right != f1 {
 		t.Errorf("Root right leaf doesn't match. Was: %v", tree.right)
 	}
-	if f1.right != lowestRight {
-		t.Errorf("Top node right leaf doesn't match. Was: %v", f1.right)
+
+	if err := f1.checkNode(f2, lowestRight, "Top node"); err != nil {
+		t.Errorf(err.Error())
 	}
-	if f1.left != f2 {
-		t.Errorf("Top node left leaf doesn't match. Was: %v", f1.left)
-	}
-	if f2.right != lowestRight {
-		t.Errorf("Leaf node right leaf doesn't match. Was: %v", f2.right)
-	}
-	if f2.left != lowestLeft {
-		t.Errorf("Leaf node left leaf doesn't match. Was: %v", f2.left)
+	if err := f2.checkNode(lowestLeft, lowestRight, "Leaf node"); err != nil {
+		t.Errorf(err.Error())
 	}
 }
 
@@ -57,16 +65,11 @@ func TestInsertRight(t *testing.T) {
 	if tree.right != f1 {
 		t.Errorf("Root right leaf doesn't match. Was: %v", tree.right)
 	}
-	if f1.right != f2 {
-		t.Errorf("Top node right leaf doesn't match. Was: %v", f1.right)
+
+	if err := f1.checkNode(lowestLeft, f2, "Top node"); err != nil {
+		t.Errorf(err.Error())
 	}
-	if f1.left != lowestLeft {
-		t.Errorf("Top node left leaf doesn't match. Was: %v", f1.left)
-	}
-	if f2.right != lowestRight {
-		t.Errorf("Leaf node right leaf doesn't match. Was: %v", f2.right)
-	}
-	if f2.left != lowestLeft {
-		t.Errorf("Leaf node left leaf doesn't match. Was: %v", f2.left)
+	if err := f2.checkNode(lowestLeft, lowestRight, "Leaf node"); err != nil {
+		t.Errorf(err.Error())
 	}
 }

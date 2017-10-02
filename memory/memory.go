@@ -44,6 +44,7 @@ func (f *frame) insert(newFrame *frame) {
 
 	loop := true
 	node := f
+	parent := f
 
 	for loop {
 		if newFrame.length <= node.length {
@@ -51,23 +52,29 @@ func (f *frame) insert(newFrame *frame) {
 
 			if newFrame.address <= node.address {
 				// descend left
+				parent = node
 				node = node.left
 			} else {
 				// descend right
+				parent = node
 				node = node.right
 			}
-
 		} else {
 			// new node is larger than current, insert here
 
-			f.right = newFrame
-			newFrame.right = node
-			newFrame.left = lowestLeft
-			loop = false
+			if newFrame.address <= parent.address {
+				// append left
+				newFrame.left = parent.left
+				newFrame.right = lowestRight
+				parent.left = newFrame
+			} else {
+				// append right
+				newFrame.right = parent.right
+				newFrame.left = lowestLeft
+				parent.right = newFrame
+			}
 
-			newFrame.left = node
-			newFrame.right = lowestRight
-			// how do I change the parent?  parent.left = newFrame
+			loop = false
 		}
 	}
 }

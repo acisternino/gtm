@@ -50,13 +50,12 @@ func (f *frame) insert(newFrame *frame) {
 		if newFrame.length <= node.length {
 			// new node is smaller than current, go down according to address
 
+			parent = node
 			if newFrame.address <= node.address {
 				// descend left
-				parent = node
 				node = node.left
 			} else {
 				// descend right
-				parent = node
 				node = node.right
 			}
 		} else {

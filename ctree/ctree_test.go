@@ -1,13 +1,15 @@
 // Copyright (c) 2017 Andrea Cisternino. All rights reserved.
+// Use of this source code is governed by a MIT license
+// that can be found in the LICENSE file.
 
-package memory
+package ctree
 
 import (
 	"fmt"
 	"testing"
 )
 
-func (f *frame) checkNode(expectedLeft, expectedRight *frame, name string) error {
+func (f *Frame) checkNode(expectedLeft, expectedRight *Frame, name string) error {
 	if f.right != expectedRight {
 		return fmt.Errorf("%s right leaf doesn't match. Was: %v", name, f.right)
 	}
@@ -18,10 +20,10 @@ func (f *frame) checkNode(expectedLeft, expectedRight *frame, name string) error
 }
 
 func TestInsertFirst(t *testing.T) {
-	tree := newTree()
+	tree := New()
 
-	f := &frame{length: 100, address: 0}
-	tree.insert(f)
+	f := &Frame{Length: 100, Address: 0}
+	tree.Add(f)
 
 	if tree.right != f {
 		t.Errorf("Root right leaf doesn't match. Was: %v", tree.right)
@@ -35,12 +37,12 @@ func TestInsertFirst(t *testing.T) {
 }
 
 func TestInsertLeft(t *testing.T) {
-	tree := newTree()
+	tree := New()
 
-	f1 := &frame{length: 1000, address: 1000}
-	f2 := &frame{length: 100, address: 100}
-	tree.insert(f1)
-	tree.insert(f2)
+	f1 := &Frame{Length: 1000, Address: 1000}
+	f2 := &Frame{Length: 100, Address: 100}
+	tree.Add(f1)
+	tree.Add(f2)
 
 	if tree.right != f1 {
 		t.Errorf("Root right leaf doesn't match. Was: %v", tree.right)
@@ -55,12 +57,12 @@ func TestInsertLeft(t *testing.T) {
 }
 
 func TestInsertRight(t *testing.T) {
-	tree := newTree()
+	tree := New()
 
-	f1 := &frame{length: 1000, address: 100}
-	f2 := &frame{length: 100, address: 2000}
-	tree.insert(f1)
-	tree.insert(f2)
+	f1 := &Frame{Length: 1000, Address: 100}
+	f2 := &Frame{Length: 100, Address: 2000}
+	tree.Add(f1)
+	tree.Add(f2)
 
 	if tree.right != f1 {
 		t.Errorf("Root right leaf doesn't match. Was: %v", tree.right)

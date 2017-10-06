@@ -40,8 +40,8 @@ type Frame struct {
 // They simplify tree traversal avoiding explicit checks for nil.
 
 var (
-	lowestLeft  = &frame{math.MinInt32, math.MinInt32, nil, nil}
-	lowestRight = &frame{math.MaxInt32, math.MinInt32, nil, nil}
+	lowestLeft  = &Frame{math.MinInt32, math.MinInt32, nil, nil}
+	lowestRight = &Frame{math.MaxInt32, math.MinInt32, nil, nil}
 )
 
 // New return a new empty tree. The Frame returned is not part of the tree

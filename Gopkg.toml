@@ -1,0 +1,10 @@
+# Copyright (c) 2017 Andrea Cisternino. All rights reserved.
+# Use of this source code is governed by a MIT license
+# that can be found in the LICENSE file.
+
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+
+[[constraint]]
+  name = "github.com/pkg/errors"
+  version = "0.8.0"

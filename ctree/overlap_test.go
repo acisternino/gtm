@@ -19,8 +19,8 @@ var (
 func TestPositionRight(t *testing.T) {
 	t.Log("Other frame is to the right")
 
-	this := &Frame{40, 10, nil, nil}
-	other := &Frame{50, 80, nil, nil}
+	this := &Frame{10, 40, nil, nil}
+	other := &Frame{80, 50, nil, nil}
 
 	if res := this.position(other); res != right {
 		t.Errorf("Expected \"Right\", but was %v instead.", names[res])
@@ -30,7 +30,7 @@ func TestPositionRight(t *testing.T) {
 func TestPositionTouchesRight(t *testing.T) {
 	t.Log("Other frame touches to the right")
 
-	this := &Frame{40, 10, nil, nil}
+	this := &Frame{10, 40, nil, nil}
 	other := &Frame{50, 50, nil, nil}
 
 	if res := this.position(other); res != touchRight {
@@ -41,8 +41,8 @@ func TestPositionTouchesRight(t *testing.T) {
 func TestPositionLeft(t *testing.T) {
 	t.Log("Other frame is to the left")
 
-	this := &Frame{40, 100, nil, nil}
-	other := &Frame{20, 10, nil, nil}
+	this := &Frame{100, 40, nil, nil}
+	other := &Frame{10, 20, nil, nil}
 
 	if res := this.position(other); res != left {
 		t.Errorf("Expected \"Left\", but was %v instead.", names[res])
@@ -52,8 +52,8 @@ func TestPositionLeft(t *testing.T) {
 func TestPositionTouchesLeft(t *testing.T) {
 	t.Log("Other frame touches to the left")
 
-	this := &Frame{40, 100, nil, nil}
-	other := &Frame{20, 80, nil, nil}
+	this := &Frame{100, 40, nil, nil}
+	other := &Frame{80, 20, nil, nil}
 
 	if res := this.position(other); res != touchLeft {
 		t.Errorf("Expected \"TouchLeft\", but was %v instead.", names[res])
@@ -63,8 +63,8 @@ func TestPositionTouchesLeft(t *testing.T) {
 func TestPositionOverlapsLeft(t *testing.T) {
 	t.Log("Other frame overlaps left")
 
-	this := &Frame{40, 100, nil, nil}
-	other := &Frame{40, 80, nil, nil}
+	this := &Frame{100, 40, nil, nil}
+	other := &Frame{80, 40, nil, nil}
 
 	if res := this.position(other); res != overlaps {
 		t.Errorf("Expected \"Overlaps\", but was %v instead.", names[res])
@@ -74,8 +74,8 @@ func TestPositionOverlapsLeft(t *testing.T) {
 func TestPositionOverlapsRight(t *testing.T) {
 	t.Log("Other frame overlaps right")
 
-	this := &Frame{40, 100, nil, nil}
-	other := &Frame{40, 120, nil, nil}
+	this := &Frame{100, 40, nil, nil}
+	other := &Frame{120, 40, nil, nil}
 
 	if res := this.position(other); res != overlaps {
 		t.Errorf("Expected \"Overlaps\", but was %v instead.", names[res])
@@ -86,7 +86,7 @@ func TestPositionOverlapsFully(t *testing.T) {
 	t.Log("Other frame overlaps fully")
 
 	this := &Frame{100, 100, nil, nil}
-	other := &Frame{40, 120, nil, nil}
+	other := &Frame{120, 40, nil, nil}
 
 	if res := this.position(other); res != overlaps {
 		t.Errorf("Expected \"Overlaps\", but was %v instead.", names[res])

@@ -24,7 +24,9 @@ See more at https://en.wikipedia.org/wiki/Cartesian_tree
 package ctree
 
 import (
-	"math"
+	"fmt"
+
+	"github.com/pkg/errors"
 )
 
 // Frame represents a segment of free memory.
@@ -35,49 +37,72 @@ type Frame struct {
 	right   *Frame
 }
 
-// These two variables are used as terminals with values that place them
-// below every other node and at the extreme left and right.
-// They simplify tree traversal avoiding explicit checks for nil.
-
-var (
-	lowestLeft  = &Frame{math.MinInt32, math.MinInt32, nil, nil}
-	lowestRight = &Frame{math.MaxInt32, math.MinInt32, nil, nil}
-)
-
-// New return a new empty tree. The Frame returned is not part of the tree
-// and is placed at the hypotetical top-left corner of the coordinate space
-// defined by the length and address attributes. The "real" tree hangs at
-// its right.
-func New() *Frame {
-	return &Frame{
-		Address: math.MinInt32,
-		Length:  math.MaxInt32,
-		left:    lowestLeft,
-		right:   lowestRight,
+// Traverse the subtree anchored at f in pre-order depth-first order.
+// Each node is provided to function visit for processing.
+func (f *Frame) Traverse(visit func(*Frame) error) error {
+	s := newStackWith(f)
+	for !s.empty() {
+		current, err := s.pop()
+		if err != nil {
+			return errors.Wrap(err, "read failed")
+		}
+		if err = visit(current); err != nil {
+			return err
+		}
+		// by pushing right first, we visit the left subtree first
+		if current.right != nil {
+			s.push(current.right)
+		}
+		if current.left != nil {
+			s.push(current.left)
+		}
 	}
+	return nil
 }
 
-// NewWithValues return a new tree with an initial root node already initialized.
-func NewWithValues(address, length int32) *Frame {
-	return &Frame{
-		Address: math.MinInt32,
-		Length:  math.MaxInt32,
-		left:    lowestLeft,
-		right:   &Frame{address, length, lowestLeft, lowestRight},
-	}
+// String returns a string representation of the Frame.
+func (f Frame) String() string {
+	return fmt.Sprintf("[%d,%d]", f.Address, f.Length)
 }
 
-// Add inserts a frame into the tree below the current one.
-func (f *Frame) Add(nf *Frame) {
+// CTree is the cartesian tree containing the free memory segments.
+type CTree struct {
+	root   *Frame
+	Frames int
+}
+
+// New return a new empty tree.
+func New() *CTree {
+	return new(CTree)
+}
+
+// NewWithLength return a new tree with an initial root node already
+// initialized with the given length and address 0.
+func NewWithLength(length int32) *CTree {
+	ct := New()
+	ct.Add(&Frame{Address: 0, Length: length})
+	return ct
+}
+
+// Add inserts a frame to the tree.
+// TODO() check for overlap of ranges
+func (t *CTree) Add(f *Frame) {
+	if t.root == nil {
+		t.root = f
+		t.Frames++
+		return
+	}
+
+	current := t.root
+	parent := (*Frame)(nil)
+
 	loop := true
-	current := f
-	parent := f
 
 	for loop {
-		if nf.Length <= current.Length {
+		if current != nil && f.Length <= current.Length {
 			// new frame is smaller than current, descend according to address
 			parent = current
-			if nf.Address <= current.Address {
+			if f.Address <= current.Address {
 				// descend left
 				current = current.left
 			} else {
@@ -85,19 +110,31 @@ func (f *Frame) Add(nf *Frame) {
 				current = current.right
 			}
 		} else {
-			// new frame is larger than current, insert here
-			if nf.Address <= parent.Address {
-				// append left
-				nf.left = parent.left
-				nf.right = lowestRight
-				parent.left = nf
+			// new frame is larger than current or we reached the end: insert here
+			if parent == nil {
+				// root insertion
+				t.root = f
+				// here current points to the old root
+				if current.Address <= f.Address {
+					f.left = current
+				} else {
+					f.right = current
+				}
 			} else {
-				// append right
-				nf.right = parent.right
-				nf.left = lowestLeft
-				parent.right = nf
+				if f.Address <= parent.Address {
+					// append left
+					f.left = parent.left
+					f.right = nil
+					parent.left = f
+				} else {
+					// append right
+					f.right = parent.right
+					f.left = nil
+					parent.right = f
+				}
 			}
 			loop = false
 		}
 	}
+	t.Frames++
 }

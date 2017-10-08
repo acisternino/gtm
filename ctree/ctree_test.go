@@ -5,73 +5,65 @@
 package ctree
 
 import (
-	"fmt"
+	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func (f *Frame) checkNode(expectedLeft, expectedRight *Frame, name string) error {
-	if f.right != expectedRight {
-		return fmt.Errorf("%s right leaf doesn't match. Was: %v", name, f.right)
-	}
-	if f.left != expectedLeft {
-		return fmt.Errorf("%s left leaf doesn't match. Was: %v", name, f.left)
-	}
-	return nil
-}
-
-func TestInsertFirst(t *testing.T) {
+func TestAddFirst(t *testing.T) {
 	tree := New()
 
-	f := &Frame{Length: 100, Address: 0}
+	f := &Frame{Address: 0, Length: 100}
 	tree.Add(f)
 
-	if tree.right != f {
-		t.Errorf("Root right leaf doesn't match. Was: %v", tree.right)
-	}
-	if f.right != lowestRight {
-		t.Errorf("Inserted node right leaf doesn't match. Was: %v", f.right)
-	}
-	if f.left != lowestLeft {
-		t.Errorf("Inserted node left leaf doesn't match. Was: %v", f.left)
-	}
+	assert.Equal(t, 1, tree.Frames)
+	assert.Equal(t, f, tree.root)
+	assert.Nil(t, f.left)
+	assert.Nil(t, f.right)
 }
 
-func TestInsertLeft(t *testing.T) {
+func TestAddLeft(t *testing.T) {
 	tree := New()
 
-	f1 := &Frame{Length: 1000, Address: 1000}
-	f2 := &Frame{Length: 100, Address: 100}
-	tree.Add(f1)
+	f2 := &Frame{Address: 100, Length: 100}
 	tree.Add(f2)
+	f1 := &Frame{Address: 1000, Length: 1000}
+	tree.Add(f1)
 
-	if tree.right != f1 {
-		t.Errorf("Root right leaf doesn't match. Was: %v", tree.right)
-	}
-
-	if err := f1.checkNode(f2, lowestRight, "Top node"); err != nil {
-		t.Errorf(err.Error())
-	}
-	if err := f2.checkNode(lowestLeft, lowestRight, "Leaf node"); err != nil {
-		t.Errorf(err.Error())
-	}
+	assert.Equal(t, 2, tree.Frames)
+	assert.Equal(t, f1, tree.root)
+	assert.Equal(t, f1.left, f2)
+	assert.Nil(t, tree.root.right)
 }
 
-func TestInsertRight(t *testing.T) {
+func TestAddRight(t *testing.T) {
 	tree := New()
 
-	f1 := &Frame{Length: 1000, Address: 100}
-	f2 := &Frame{Length: 100, Address: 2000}
-	tree.Add(f1)
+	f2 := &Frame{Address: 2000, Length: 100}
 	tree.Add(f2)
+	f1 := &Frame{Address: 100, Length: 1000}
+	tree.Add(f1)
 
-	if tree.right != f1 {
-		t.Errorf("Root right leaf doesn't match. Was: %v", tree.right)
-	}
+	assert.Equal(t, 2, tree.Frames)
+	assert.Equal(t, f1, tree.root)
+	assert.Equal(t, f1.right, f2)
+	assert.Nil(t, tree.root.left)
+}
 
-	if err := f1.checkNode(lowestLeft, f2, "Top node"); err != nil {
-		t.Errorf(err.Error())
-	}
-	if err := f2.checkNode(lowestLeft, lowestRight, "Leaf node"); err != nil {
-		t.Errorf(err.Error())
-	}
+func TestTraverse(t *testing.T) {
+	tree := New()
+
+	tree.Add(&Frame{Address: 0, Length: 100})
+	tree.Add(&Frame{Address: 500, Length: 300})
+	tree.Add(&Frame{Address: 1000, Length: 80})
+	tree.Add(&Frame{Address: 1500, Length: 200})
+
+	nodes := make([]string, 0, 10)
+	tree.root.Traverse(func(f *Frame) error {
+		nodes = append(nodes, f.String())
+		return nil
+	})
+	result := strings.Join(nodes, "")
+	assert.Equal(t, "[500,300][0,100][1500,200][1000,80]", result)
 }

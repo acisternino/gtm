@@ -14,8 +14,8 @@ func TestPopEmpty(t *testing.T) {
 	if !stack.empty() {
 		t.Errorf("Expected an empty stack.")
 	}
-	if _, err := stack.pop(); err != errorEmptyStack {
-		t.Errorf("Popping from an empty stack. Expected \"%v\", was: \"%v\"", errorEmptyStack, err)
+	if _, err := stack.pop(); err != errEmptyStack {
+		t.Errorf("Popping from an empty stack. Expected \"%v\", was: \"%v\"", errEmptyStack, err)
 	}
 	if d := stack.depth(); d != 0 {
 		t.Errorf("Wrong stack depth. Expected 0, was: \"%v\"", d)

@@ -10,7 +10,7 @@ package ctree
 
 import "errors"
 
-var errorEmptyStack = errors.New("Illegal operation: stack is empty")
+var errEmptyStack = errors.New("Illegal operation: stack is empty")
 
 // blockSize is the default number of slots in the stack.
 const blockSize = 64
@@ -52,7 +52,7 @@ func (s *stack) push(f *Frame) {
 // pop removes a Frame pointer from the top of the stack and returns it.
 func (s *stack) pop() (*Frame, error) {
 	if s.current < 0 {
-		return nil, errorEmptyStack
+		return nil, errEmptyStack
 	}
 	f := s.frames[s.current]
 	s.current--

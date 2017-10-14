@@ -57,26 +57,37 @@ func (f *Frame) Add(nf, parent *Frame) {
 			// new frame is larger than current or we reached the end: insert here
 			if nf.Address <= parent.Address {
 				// append left
-				nf.left = current // was parent.left
-				nf.right = nil
 				parent.left = nf
-				// rebalance current.right
-				nf.rebalanceLeft(parent)
 			} else {
 				// append right
-				nf.right = current // was parent.right
-				nf.left = nil
 				parent.right = nf
-				// rebalance current.left
+			}
+			if current != nil {
+				// fix subtree
+				nf.append(current)
 			}
 			loop = false
 		}
 	}
 }
 
-// Traverse the subtree anchored at f in pre-order depth-first order.
+// append takes a subtree and moves it in the right position below this Frame.
+// The part of the tree affected by the insertion is also rebalanced.
+func (f *Frame) append(child *Frame) {
+	if child.Address <= f.Address {
+		f.left = child
+		// rebalance child.right
+		// nf.rebalanceLeft(parent)
+	} else {
+		f.right = child
+		// rebalance child.left
+	}
+}
+
+// TraversePre iterates over the subtree anchored at f in pre-order
+// depth-first mode.
 // Each node is provided to function visit for processing.
-func (f *Frame) Traverse(visit func(*Frame) error) error {
+func (f *Frame) TraversePre(visit func(*Frame) error) error {
 	s := newStackWith(f)
 	for !s.empty() {
 		current, err := s.pop()
@@ -97,6 +108,44 @@ func (f *Frame) Traverse(visit func(*Frame) error) error {
 	return nil
 }
 
+// TraversePost iterates over the subtree anchored at f in post-order
+// depth-first mode.
+// Each node is provided to function visit for processing.
+// Inspired by: https://stackoverflow.com/a/16092333/2774065
+func (f *Frame) TraversePost(visit func(*Frame) error) error {
+	s := newStackWith(f)
+	current := f
+	for !s.empty() {
+		next := s.peek()
+		done := next.right == current || next.left == current
+		isLeaf := next.left == nil && next.right == nil
+		if done || isLeaf {
+			_, err := s.pop()
+			if err != nil {
+				return errors.Wrap(err, "stack error")
+			}
+			if err = visit(next); err != nil {
+				return err
+			}
+			current = next
+		} else {
+			if next.right != nil {
+				s.push(next.right)
+			}
+			if next.left != nil {
+				s.push(next.left)
+			}
+		}
+	}
+	return nil
+}
+
+/*
+
+
+
+
+ */
 // rebalanceLeft re-distributes child nodes so that their addresses are
 // correctly sorted.
 func (f *Frame) rebalanceLeft(parent *Frame) {
@@ -107,7 +156,7 @@ func (f *Frame) rebalanceLeft(parent *Frame) {
 	branch := f.left.right
 	f.left.right = nil
 
-	branch.Traverse(func(tf *Frame) error {
+	branch.TraversePost(func(tf *Frame) error {
 		fmt.Println("rebalancing ", tf)
 		f.Add(tf, parent)
 		return nil

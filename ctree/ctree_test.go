@@ -99,19 +99,38 @@ func TestAddRight(t *testing.T) {
 	assert.Nil(t, actual.left)
 }
 
-func TestTraverse(t *testing.T) {
+func TestTraversePre(t *testing.T) {
 	tree := New(100)
+	tree.Add(&Frame{Address: 200, Length: 80})
 	tree.Add(&Frame{Address: 500, Length: 300})
 	tree.Add(&Frame{Address: 1000, Length: 80})
 	tree.Add(&Frame{Address: 1500, Length: 200})
+	tree.Add(&Frame{Address: 2000, Length: 100})
 
 	nodes := make([]string, 0, 10)
-	tree.root.Traverse(func(f *Frame) error {
+	tree.root.TraversePre(func(f *Frame) error {
 		nodes = append(nodes, f.String())
 		return nil
 	})
 	result := strings.Join(nodes, "")
-	assert.Equal(t, "[500,300][0,100][1500,200][1000,80]", result)
+	assert.Equal(t, "[500,300][0,100][200,80][1500,200][1000,80][2000,100]", result)
+}
+
+func TestTraversePost(t *testing.T) {
+	tree := New(100)
+	tree.Add(&Frame{Address: 200, Length: 80})
+	tree.Add(&Frame{Address: 500, Length: 300})
+	tree.Add(&Frame{Address: 1000, Length: 80})
+	tree.Add(&Frame{Address: 1500, Length: 200})
+	tree.Add(&Frame{Address: 2000, Length: 100})
+
+	nodes := make([]string, 0, 10)
+	tree.root.TraversePost(func(f *Frame) error {
+		nodes = append(nodes, f.String())
+		return nil
+	})
+	result := strings.Join(nodes, "")
+	assert.Equal(t, "[200,80][0,100][1000,80][2000,100][1500,200][500,300]", result)
 }
 
 /*

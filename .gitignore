@@ -3,4 +3,5 @@ gtm
 gtm.exe
 
 *.a
+debug.test
 .DS_Store

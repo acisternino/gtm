@@ -140,12 +140,6 @@ func (f *Frame) TraversePost(visit func(*Frame) error) error {
 	return nil
 }
 
-/*
-
-
-
-
- */
 // rebalanceLeft re-distributes child nodes so that their addresses are
 // correctly sorted.
 func (f *Frame) rebalanceLeft(parent *Frame) {

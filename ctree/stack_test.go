@@ -6,20 +6,23 @@ package ctree
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+const (
+	wrongDepthMsg  = "Wrong stack depth"
+	wrongObjectMsg = "Wrong object"
 )
 
 func TestPopEmpty(t *testing.T) {
 	stack := newStack()
 
-	if !stack.empty() {
-		t.Errorf("Expected an empty stack.")
-	}
-	if _, err := stack.pop(); err != errEmptyStack {
-		t.Errorf("Popping from an empty stack. Expected \"%v\", was: \"%v\"", errEmptyStack, err)
-	}
-	if d := stack.depth(); d != 0 {
-		t.Errorf("Wrong stack depth. Expected 0, was: \"%v\"", d)
-	}
+	assert.True(t, stack.empty())
+
+	_, err := stack.pop()
+	assert.EqualError(t, err, errEmptyStack.Error())
+	assert.Equalf(t, 0, stack.depth(), wrongDepthMsg)
 }
 
 func TestPushOne(t *testing.T) {
@@ -28,15 +31,11 @@ func TestPushOne(t *testing.T) {
 	fp := &Frame{Address: 0, Length: 100}
 	stack.push(fp)
 
-	if d := stack.depth(); d != 1 {
-		t.Errorf("Wrong stack depth. Expected 1, was: \"%v\"", d)
-	}
+	assert.Equalf(t, 1, stack.depth(), wrongDepthMsg)
+
 	result, err := stack.pop()
-	if err != nil {
-		t.Errorf("Unexpected error while popping: \"%v\"", err)
-	}
-	if result != fp {
-		t.Errorf("Wrong frame: Expected \"%v\", was \"%v\"", fp, result)
+	if assert.NoError(t, err) {
+		assert.Equalf(t, fp, result, wrongObjectMsg)
 	}
 }
 
@@ -48,21 +47,13 @@ func TestPushTwo(t *testing.T) {
 	fp2 := &Frame{Address: 10, Length: 1000}
 	stack.push(fp2)
 
-	if d := stack.depth(); d != 2 {
-		t.Errorf("Wrong stack depth. Expected 2, was: \"%v\"", d)
-	}
+	assert.Equalf(t, 2, stack.depth(), wrongDepthMsg)
+
 	result, err := stack.pop()
-	if err != nil {
-		t.Errorf("Unexpected error while popping: \"%v\"", err)
-	}
-	if result != fp2 {
-		t.Errorf("Wrong frame: Expected \"%v\", was \"%v\"", fp2, result)
-	}
-	if d := stack.depth(); d != 1 {
-		t.Errorf("Wrong stack depth. Expected 1, was: \"%v\"", d)
-	}
-	if stack.empty() {
-		t.Errorf("Expected a non empty stack.")
+	if assert.NoError(t, err) {
+		assert.Equalf(t, fp2, result, wrongObjectMsg)
+		assert.Equalf(t, 1, stack.depth(), wrongDepthMsg)
+		assert.False(t, stack.empty())
 	}
 }
 
@@ -73,24 +64,16 @@ func TestAfterPop(t *testing.T) {
 	stack.push(fp)
 
 	_, err := stack.pop()
-	if err != nil {
-		t.Errorf("Unexpected error while popping: \"%v\"", err)
-	}
-
-	if d := stack.depth(); d != 0 {
-		t.Errorf("Wrong stack depth. Expected 0, was: \"%v\"", d)
-	}
-	if !stack.empty() {
-		t.Errorf("Expected an empty stack.")
+	if assert.NoError(t, err) {
+		assert.Equalf(t, 0, stack.depth(), wrongDepthMsg)
+		assert.True(t, stack.empty())
 	}
 }
 
 func TestPeekEmpty(t *testing.T) {
 	stack := newStack()
 
-	if r := stack.peek(); r != nil {
-		t.Errorf("Expected nil, was \"%v\"", r)
-	}
+	assert.Nil(t, stack.peek())
 }
 
 func TestPeek(t *testing.T) {
@@ -101,11 +84,9 @@ func TestPeek(t *testing.T) {
 	fp2 := &Frame{Address: 10, Length: 1000}
 	stack.push(fp2)
 
-	if r := stack.peek(); r != fp2 {
-		t.Errorf("Wrong frame: Expected \"%v\", was \"%v\"", fp2, r)
-	}
-	stack.pop()
-	if r := stack.peek(); r != fp1 {
-		t.Errorf("Wrong frame: Expected \"%v\", was \"%v\"", fp1, r)
+	assert.Equal(t, fp2, stack.peek(), wrongObjectMsg)
+	_, err := stack.pop()
+	if assert.NoError(t, err) {
+		assert.Equal(t, fp1, stack.peek(), wrongObjectMsg)
 	}
 }

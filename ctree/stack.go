@@ -59,6 +59,14 @@ func (s *stack) pop() (*Frame, error) {
 	return f, nil
 }
 
+// peek returns the Frame at the top of this stack without removing it.
+func (s *stack) peek() *Frame {
+	if s.current < 0 {
+		return nil
+	}
+	return s.frames[s.current]
+}
+
 // depth return the number of items currently in the stack.
 func (s stack) depth() int {
 	return s.current + 1

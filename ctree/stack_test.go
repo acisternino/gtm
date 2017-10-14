@@ -84,3 +84,28 @@ func TestAfterPop(t *testing.T) {
 		t.Errorf("Expected an empty stack.")
 	}
 }
+
+func TestPeekEmpty(t *testing.T) {
+	stack := newStack()
+
+	if r := stack.peek(); r != nil {
+		t.Errorf("Expected nil, was \"%v\"", r)
+	}
+}
+
+func TestPeek(t *testing.T) {
+	stack := newStack()
+
+	fp1 := &Frame{Address: 0, Length: 100}
+	stack.push(fp1)
+	fp2 := &Frame{Address: 10, Length: 1000}
+	stack.push(fp2)
+
+	if r := stack.peek(); r != fp2 {
+		t.Errorf("Wrong frame: Expected \"%v\", was \"%v\"", fp2, r)
+	}
+	stack.pop()
+	if r := stack.peek(); r != fp1 {
+		t.Errorf("Wrong frame: Expected \"%v\", was \"%v\"", fp1, r)
+	}
+}

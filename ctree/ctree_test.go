@@ -133,12 +133,11 @@ func TestTraversePost(t *testing.T) {
 	assert.Equal(t, "[200,80][0,100][1000,80][2000,100][1500,200][500,300]", result)
 }
 
-/*
 func NewFrame(address, length int32) *Frame {
 	return &Frame{address, length, nil, nil}
 }
 
-func TestRebalance(t *testing.T) {
+func TestRebalanceRight(t *testing.T) {
 	tree := New(5)
 	tree.Add(NewFrame(250, 20))
 	tree.Add(NewFrame(280, 10))
@@ -148,11 +147,31 @@ func TestRebalance(t *testing.T) {
 	tree.Add(NewFrame(300, 25)) // triggers rebalance
 
 	nodes := make([]string, 0, 10)
-	tree.root.Traverse(func(f *Frame) error {
+	tree.root.TraversePre(func(f *Frame) error {
 		nodes = append(nodes, f.String())
 		return nil
 	})
 	result := strings.Join(nodes, "")
 	assert.Equal(t, "[470,35][300,25][250,20][0,5][280,10][350,15]", result)
 }
-*/
+
+func TestRebalanceLeft(t *testing.T) {
+	tree := New(20)
+	tree.Add(NewFrame(130, 40))
+	tree.Add(NewFrame(410, 5))
+	tree.Add(NewFrame(210, 20))
+	tree.Add(NewFrame(180, 25))
+	tree.Add(NewFrame(500, 30))
+	tree.Add(NewFrame(630, 10))
+	tree.Add(NewFrame(700, 20))
+
+	tree.Add(NewFrame(300, 35)) // triggers rebalance
+
+	nodes := make([]string, 0, 12)
+	tree.root.TraversePre(func(f *Frame) error {
+		nodes = append(nodes, f.String())
+		return nil
+	})
+	result := strings.Join(nodes, "")
+	assert.Equal(t, "[130,40][0,20][300,35][180,25][210,20][500,30][410,5][700,20][630,10]", result)
+}

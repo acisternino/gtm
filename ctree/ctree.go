@@ -74,13 +74,30 @@ func (f *Frame) Add(nf, parent *Frame) {
 // append takes a subtree and moves it in the right position below this Frame.
 // The part of the tree affected by the insertion is also rebalanced.
 func (f *Frame) append(child *Frame) {
+	var tbr *Frame
 	if child.Address <= f.Address {
 		f.left = child
 		// rebalance child.right
-		// nf.rebalanceLeft(parent)
+		if child.right != nil {
+			tbr = child.right
+			child.right = nil
+		}
 	} else {
 		f.right = child
 		// rebalance child.left
+		if child.left != nil {
+			tbr = child.left
+			child.left = nil
+		}
+	}
+	// rebalance if needed
+	if tbr != nil {
+		tbr.TraversePost(func(tf *Frame) error {
+			tf.DetachChildren()
+			// parent can be nil because we know we are appending strictly below f
+			f.Add(tf, nil)
+			return nil
+		})
 	}
 }
 
@@ -118,8 +135,8 @@ func (f *Frame) TraversePost(visit func(*Frame) error) error {
 	for !s.empty() {
 		next := s.peek()
 		done := next.right == current || next.left == current
-		isLeaf := next.left == nil && next.right == nil
-		if done || isLeaf {
+		leaf := next.left == nil && next.right == nil
+		if done || leaf {
 			_, err := s.pop()
 			if err != nil {
 				return errors.Wrap(err, "stack error")
@@ -140,21 +157,9 @@ func (f *Frame) TraversePost(visit func(*Frame) error) error {
 	return nil
 }
 
-// rebalanceLeft re-distributes child nodes so that their addresses are
-// correctly sorted.
-func (f *Frame) rebalanceLeft(parent *Frame) {
-	if f.left == nil || f.left.right == nil {
-		return
-	}
-	// detach affected nodes
-	branch := f.left.right
-	f.left.right = nil
-
-	branch.TraversePost(func(tf *Frame) error {
-		fmt.Println("rebalancing ", tf)
-		f.Add(tf, parent)
-		return nil
-	})
+// DetachChildren resets the left and right pinters of this Frame.
+func (f *Frame) DetachChildren() {
+	f.left, f.right = nil, nil
 }
 
 // String returns a string representation of the Frame.

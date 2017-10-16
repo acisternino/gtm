@@ -193,9 +193,17 @@ func (t *CTree) Add(nf *Frame) {
 		if nf.Address <= t.root.Address {
 			// new is to the left
 			nf.right = t.root
+			if nf.right.left != nil {
+				// rebalance
+				nf.append(nf.right.left)
+			}
 		} else {
 			// new is to the right
 			nf.left = t.root
+			if nf.left.right != nil {
+				// rebalance
+				nf.append(nf.left.right)
+			}
 		}
 		t.Frames++
 		t.root = nf

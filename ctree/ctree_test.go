@@ -11,6 +11,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func NewFrame(address, length int32) *Frame {
+	return &Frame{address, length, nil, nil}
+}
+
 func TestRootAddAboveRight(t *testing.T) {
 	tree := New(50) // [0,50]
 	r := tree.root
@@ -61,6 +65,35 @@ func TestRootAddLeft(t *testing.T) {
 	assert.Equal(t, int32(100), tree.root.Length)
 	assert.Equal(t, f, tree.root.left)
 	assert.Nil(t, tree.root.right)
+}
+
+func TestRootRebalanceRight(t *testing.T) {
+	tree := New(50)         // [0,50]
+	tree.root.Address = 300 // move root to the right
+
+	tree.Add(NewFrame(100, 25))
+	assert.Equal(t, 2, tree.Frames)
+	assert.Equal(t, int32(25), tree.root.left.Length)
+
+	tree.Add(NewFrame(200, 100))
+	assert.Equal(t, 3, tree.Frames)
+	assert.Equal(t, int32(100), tree.root.Length)
+	assert.Equal(t, int32(50), tree.root.right.Length)
+	assert.Equal(t, int32(25), tree.root.left.Length)
+}
+
+func TestRootRebalanceLeft(t *testing.T) {
+	tree := New(50) // [0,50]
+
+	tree.Add(NewFrame(300, 25))
+	assert.Equal(t, 2, tree.Frames)
+	assert.Equal(t, int32(25), tree.root.right.Length)
+
+	tree.Add(NewFrame(100, 100))
+	assert.Equal(t, 3, tree.Frames)
+	assert.Equal(t, int32(100), tree.root.Length)
+	assert.Equal(t, int32(25), tree.root.right.Length)
+	assert.Equal(t, int32(50), tree.root.left.Length)
 }
 
 func TestAddLeft(t *testing.T) {
@@ -131,10 +164,6 @@ func TestTraversePost(t *testing.T) {
 	})
 	result := strings.Join(nodes, "")
 	assert.Equal(t, "[200,80][0,100][1000,80][2000,100][1500,200][500,300]", result)
-}
-
-func NewFrame(address, length int32) *Frame {
-	return &Frame{address, length, nil, nil}
 }
 
 func TestRebalanceRight(t *testing.T) {

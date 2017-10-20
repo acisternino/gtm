@@ -195,7 +195,7 @@ func (t *CTree) Add(nf *Frame) {
 			nf.right = t.root
 			if nf.right.left != nil {
 				// rebalance
-				nf.append(nf.right.left)
+				nf.append(nf.right.left) // maybe should be Add() ????
 			}
 		} else {
 			// new is to the right

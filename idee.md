@@ -13,26 +13,6 @@ type Frame struct {
 }
 ```
 
-La `Add()` diventa ricorsiva, non dovrebbero esserci problemi anche se la
-rebalance diventa critica perche' se chiamiamo Add() di nuovo allora e'
-complesso.
-
-```go
-func (f *Frame) Add(nf *Frame) {
-    if nf.Length < f.Length {
-        branch := f.branchFor(new)
-        branch.Add(new)
-    } else {
-        // arrived
-        if f.parent != nil {
-            f.parent.append(new) // simple append
-        }
-        tbr := nf.append(f)
-        tbr.rebalanceOnto(nf)
-    }
-}
-```
-
 API:
 
 * **Add(Frame)**: come sopra. Magari con un booleano che flagghi se ribilanciare o no.
@@ -46,3 +26,42 @@ API:
 * **addNoBalance()**: forse fa lo stesso lavoro della Add ma senza il bilanciamento.
   In altre parole naviga finche' trova un foglia e lo aggiunge li.
   Alternativo al boolean flag della Add()
+
+
+La `Add()` diventa ricorsiva, non dovrebbero esserci problemi anche se la
+rebalance diventa critica perche' se chiamiamo Add() di nuovo allora e'
+complesso.
+
+```go
+func (f *Frame) Add(nf *Frame) {
+    if nf.Length < f.Length {
+        // descend
+        branch := f.branchFor(new)
+        // test for nil
+        branch.Add(new)
+    } else {
+        // arrived
+        if f.parent != nil {
+            f.parent.append(new) // simple append
+        }
+        tbr := nf.append(f)
+        tbr.rebalanceOnto(nf)
+    }
+}
+```
+
+```go
+func (f *Frame) branchFor(child *Frame) *Frame {
+    if child.Address <= f.Address {
+        return f.left
+    } else {
+        return f.right
+    }
+}
+```
+
+
+```go
+func (f *Frame) append(child *Frame) *Frame {
+}
+```
